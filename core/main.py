@@ -19,3 +19,11 @@ def root():
 @app.get("/names")
 def retrieve_names_list():
     return names_list
+
+
+@app.get("/names/{name_id}")
+def retrieve_name_detail(name_id: int):
+    for name in names_list:
+        if name["id"] == name_id:
+            return name
+    return {"detail": "object not found"}
