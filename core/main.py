@@ -31,10 +31,10 @@ def create_name(name: str):
 
 @app.get("/names/{name_id}")
 def retrieve_name_detail(name_id: int):
-    for name in names_list:
-        if name["id"] == name_id:
-            return name
-    return {"message": "Name not found"}
+    for item in names_list:
+        if item["id"] == name_id:
+            return item
+    return {"detail": "Name not found"}
 
 
 @app.put("/names/{name_id}")
@@ -43,4 +43,13 @@ def update_name_detail(name_id: int, name: str):
         if item["id"] == name_id:
             item["name"] = name
             return item
-    return {"message": "Name not found"}
+    return {"detail": "Name not found"}
+
+
+@app.delete("/names/{name_id}")
+def delete_name(name_id: int):
+    for item in names_list:
+        if item["id"] == name_id:
+            names_list.remove(item)
+            return {"detail": "Object removed successfuly"}
+    return {"detail": "Name not found"}
