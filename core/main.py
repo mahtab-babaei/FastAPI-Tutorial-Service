@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status, HTTPException, Query, Path, Form
+from fastapi import FastAPI, status, HTTPException, Query, Path, Form, Body
 from fastapi.responses import JSONResponse
 from typing import Optional
 import random
@@ -11,8 +11,6 @@ names_list = [
     {"id": 3, "name": "Jack"},
     {"id": 4, "name": "Joe"},
     {"id": 5, "name": "June"},
-    {"id": 6, "name": "Joe"},
-    {"id": 7, "name": "Joe"},
 ]
 
 
@@ -32,7 +30,7 @@ def retrieve_names_list(q: str | None = Query(alias="search", description="It wi
 
 
 @app.post("/names")
-def create_name(name: str = Form()):
+def create_name(name: str = Body(embed=True)):
     name_obj = {"id": random.randint(6, 100), "name": name}
     names_list.append(name_obj)
     return JSONResponse(content=name_obj, status_code=status.HTTP_201_CREATED)
