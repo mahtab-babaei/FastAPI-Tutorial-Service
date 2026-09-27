@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status, HTTPException
+from fastapi import FastAPI, status, HTTPException, Query
 from fastapi.responses import JSONResponse
 from typing import Optional
 import random
@@ -23,7 +23,7 @@ def root():
 
 
 @app.get("/names")
-def retrieve_names_list(q: Optional[str] = None):
+def retrieve_names_list(q: str | None = Query(alias="search", description="It will be searched with the title you provided", default=None, max_length=50, regex='^[^0-9]*$')):
     result = names_list
     if q:
         result = [item for item in names_list if q.lower()
