@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Query, status, HTTPException
+from fastapi import FastAPI, status, HTTPException
 from fastapi.responses import JSONResponse
+from typing import Optional
 import random
 
 app = FastAPI()
@@ -22,36 +23,38 @@ def root():
 
 
 @app.get("/names")
-def retrieve_names_list(q: str | None = Query(default=None, max_length=50)):
+def retrieve_names_list(q: Optional[str] = None):
+    result = names_list
     if q:
-        return [item for item in names_list if item["name"] == q]
-    return names_list
+        result = [item for item in names_list if q.lower()
+                  in item["name"].lower()]
+    return JSONResponse(content=result, status_code=status.HTTP_200_OK)
 
 
-@app.post("/names", status_code=status.HTTP_201_CREATED)
+@app.post("/names")
 def create_name(name: str):
     name_obj = {"id": random.randint(6, 100), "name": name}
     names_list.append(name_obj)
-    return name_obj
+    return JSONResponse(content=name_obj, status_code=status.HTTP_201_CREATED)
 
 
 @app.get("/names/{name_id}")
 def retrieve_name_detail(name_id: int):
     for item in names_list:
         if item["id"] == name_id:
-            return item
+            return JSONResponse(content=item, status_code=status.HTTP_200_OK)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Object not found")
+                        detail="Name not found")
 
 
-@app.put("/names/{name_id}", status_code=status.HTTP_200_OK)
+@app.put("/names/{name_id}")
 def update_name_detail(name_id: int, name: str):
     for item in names_list:
         if item["id"] == name_id:
             item["name"] = name
-            return item
+            return JSONResponse(content=item, status_code=status.HTTP_200_OK)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Object not found")
+                        detail="Name not found")
 
 
 @app.delete("/names/{name_id}")
@@ -59,6 +62,6 @@ def delete_name(name_id: int):
     for item in names_list:
         if item["id"] == name_id:
             names_list.remove(item)
-            return JSONResponse(content={"detail": "Object removed successfuly"}, status_code=status.HTTP_200_OK)
+            return JSONResponse(content={"detail": f"Name with ID {name_id} removed successfuly"}, status_code=status.HTTP_200_OK)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Object not found")
+                        detail="Name not found")
