@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 import random
 
 app = FastAPI()
@@ -9,6 +9,8 @@ names_list = [
     {"id": 3, "name": "Jack"},
     {"id": 4, "name": "Joe"},
     {"id": 5, "name": "June"},
+    {"id": 6, "name": "Joe"},
+    {"id": 7, "name": "Joe"},
 ]
 
 
@@ -18,7 +20,9 @@ def root():
 
 
 @app.get("/names")
-def retrieve_names_list():
+def retrieve_names_list(q: str | None = Query(default=None, max_length=50)):
+    if q:
+        return [item for item in names_list if item["name"] == q]
     return names_list
 
 
