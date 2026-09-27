@@ -35,3 +35,12 @@ def retrieve_name_detail(name_id: int):
         if name["id"] == name_id:
             return name
     return {"message": "Name not found"}
+
+
+@app.put("/names/{name_id}")
+def update_name_detail(name_id: int, name: str):
+    for item in names_list:
+        if item["id"] == name_id:
+            item["name"] = name
+            return item
+    return {"message": "Name not found"}
