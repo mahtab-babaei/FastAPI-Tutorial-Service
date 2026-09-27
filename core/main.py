@@ -1,7 +1,6 @@
-from fastapi import FastAPI, status, HTTPException, Query, Path, Form, Body
-from fastapi.responses import JSONResponse
-from typing import Optional
 import random
+from fastapi import FastAPI, status, HTTPException, Query, Path, Form, Body, File, UploadFile
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
@@ -63,3 +62,15 @@ def delete_name(name_id: int):
             return JSONResponse(content={"detail": f"Name with ID {name_id} removed successfuly"}, status_code=status.HTTP_200_OK)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail="Name not found")
+
+
+# @app.post("/upload_file")
+# def upload_file(file: bytes = File(...)):
+#     print(file)
+#     return {"file size": len(file)}
+
+@app.post("/upload_file")
+async def upload_file(file: UploadFile = File(...)):
+    content = await file.read()
+    print(file.__dict__)
+    return {"file_name": file.filename, "content_type": file.content_type, "file_size": len(content)}
