@@ -3,6 +3,7 @@ from typing import List
 from fastapi import FastAPI, status, HTTPException, Query, Path, Form, Body, File, UploadFile
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
+# from dataclasses import dataclass
 
 
 @asynccontextmanager
@@ -37,11 +38,22 @@ def retrieve_names_list(q: str | None = Query(alias="search", description="It wi
     return JSONResponse(content=result, status_code=status.HTTP_200_OK)
 
 
+# @dataclass
+# class Student:
+#     name: str
+#     age: int
+
+
 @app.post("/names")
 def create_name(name: str = Body(embed=True)):
     name_obj = {"id": random.randint(6, 100), "name": name}
     names_list.append(name_obj)
     return JSONResponse(content=name_obj, status_code=status.HTTP_201_CREATED)
+# def create_name(student: Student):
+#     print(student)
+#     print(student.name)
+#     print(student.age)
+#     return {}
 
 
 @app.get("/names/{name_id}")
