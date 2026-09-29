@@ -4,6 +4,8 @@ from fastapi import FastAPI, status, HTTPException, Query, Path, Form, Body, Fil
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 # from dataclasses import dataclass
+from schemas import PersonCreateSchema, PersonResponseSchema, PersonUpdateSchema
+from typing import List
 
 
 @asynccontextmanager
@@ -29,7 +31,7 @@ def root():
     return JSONResponse(content=content, status_code=status.HTTP_202_ACCEPTED)
 
 
-@app.get("/names")
+@app.get("/names", response_model=List[PersonResponseSchema])
 def retrieve_names_list(q: str | None = Query(alias="search", description="It will be searched with the title you provided", default=None, max_length=50, regex='^[^0-9]*$')):
     result = names_list
     if q:
@@ -44,9 +46,9 @@ def retrieve_names_list(q: str | None = Query(alias="search", description="It wi
 #     age: int
 
 
-@app.post("/names")
-def create_name(name: str = Body(embed=True)):
-    name_obj = {"id": random.randint(6, 100), "name": name}
+@app.post("/names", response_model=PersonResponseSchema)
+def create_name(person: PersonCreateSchema):
+    name_obj = {"id": random.randint(6, 100), "name": person.name}
     names_list.append(name_obj)
     return JSONResponse(content=name_obj, status_code=status.HTTP_201_CREATED)
 # def create_name(student: Student):
@@ -56,7 +58,7 @@ def create_name(name: str = Body(embed=True)):
 #     return {}
 
 
-@app.get("/names/{name_id}")
+@app.get("/names/{name_id}", response_model=PersonResponseSchema)
 def retrieve_name_detail(name_id: int = Path(title="Object id", description="The id of the name in names_list")):
     for item in names_list:
         if item["id"] == name_id:
@@ -65,11 +67,11 @@ def retrieve_name_detail(name_id: int = Path(title="Object id", description="The
                         detail="Name not found")
 
 
-@app.put("/names/{name_id}")
-def update_name_detail(name_id: int = Path(), name: str = Form()):
+@app.put("/names/{name_id}", response_model=PersonResponseSchema)
+def update_name_detail(person: PersonUpdateSchema, name_id: int = Path()):
     for item in names_list:
         if item["id"] == name_id:
-            item["name"] = name
+            item["name"] = person.name
             return JSONResponse(content=item, status_code=status.HTTP_200_OK)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail="Name not found")
