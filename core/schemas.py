@@ -1,17 +1,30 @@
-from pydantic import BaseModel
+"""Pydantic schemas for person management."""
+from pydantic import BaseModel, field_validator
 
 
 class BasePersonSchema(BaseModel):
+    """Base schema for person data."""
     name: str
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value):
+        """Validate the person's name."""
+        if len(value) > 32:
+            raise ValueError("Name must not exceed 32 characters")
+        if not value.isalpha():
+            raise ValueError("Name must contain only alphabetic characters")
+        return value
 
 
 class PersonCreateSchema(BasePersonSchema):
-    pass
+    """Schema for creating a person."""
 
 
 class PersonResponseSchema(BasePersonSchema):
+    """Schema for returning person data."""
     id: int
 
 
 class PersonUpdateSchema(BasePersonSchema):
-    pass
+    """Schema for updating a person."""
