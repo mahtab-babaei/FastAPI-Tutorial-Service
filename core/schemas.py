@@ -1,10 +1,10 @@
 """Pydantic schemas for person management."""
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 
 
 class BasePersonSchema(BaseModel):
     """Base schema for person data."""
-    name: str
+    name: str = Field(...,description="Enter person's name")
 
     @field_validator("name")
     @classmethod
