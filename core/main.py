@@ -6,6 +6,27 @@ from contextlib import asynccontextmanager
 # from dataclasses import dataclass
 from schemas import PersonCreateSchema, PersonResponseSchema, PersonUpdateSchema
 from typing import List
+from pydantic import BaseModel, EmailStr, field_serializer
+from fastapi.encoders import jsonable_encoder
+
+
+class User(BaseModel):
+    name: str
+    email: EmailStr
+    account_id: int
+    number: float
+
+    @field_serializer("number")
+    def serialize_float(self, value):
+        return round(value, 2)
+
+
+user = User(name="mahtab", email="mahtab@gmail.com",
+            account_id=1, number=80.03336665656656)
+print(user.model_dump())
+print(user.model_dump_json())
+print(user.model_dump_json(indent=2))
+print(jsonable_encoder(user))
 
 
 @asynccontextmanager
