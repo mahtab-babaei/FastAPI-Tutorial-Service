@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Text, ForeignKey
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./sqlite.db"
@@ -24,10 +24,24 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
 
-    addresses = relationship("Address",backref="user")
+    addresses = relationship("Address", backref="user")
+    profile = relationship("Profile", backref="user",uselist=False)
 
     def __repr__(self):
         return f"User(id={self.id}, username={self.username}, email={self.email})"
+
+
+class Profile(Base):
+    __tablename__ = "profiles"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
+    first_name = Column(String())
+    last_name = Column(String())
+    bio = Column(Text(), nullable=True)
+
+    def __repr__(self):
+        return f"Profiles(id={self.id},first_name={self.first_name},last_name={self.last_name})"
 
 
 class Address(Base):
@@ -49,10 +63,16 @@ Base.metadata.create_all(engine)
 session = SessionLocal()
 
 # session.add(User(username="mahtabbabaei",email="mahtab@babaei.com", password="123"))
+user = session.query(User).filter_by(username="mahtabbabaei").one_or_none()
+# session.add(Profile(user_id=user.id, first_name="Mahtab", last_name="Babaei"))
+# session.commit()
+print(user.profile.first_name)
+
+# session.add(User(username="mahtabbabaei",email="mahtab@babaei.com", password="123"))
 # session.commit()
 
-user = session.query(User).filter_by(username="mahtabbabaei").one_or_none()
-print(user.addresses)
+# user = session.query(User).filter_by(username="mahtabbabaei").one_or_none()
+# print(user.addresses)
 
 # addresses = [
 #     Address(user_id=user.id, city="abarkouh", state="yazd", zip_code="123"),
@@ -63,6 +83,7 @@ print(user.addresses)
 # session.add_all(addresses)
 # session.commit()
 
-address = session.query(Address).filter_by(user_id=user.id,city="abarkouh").one_or_none()
+# address = session.query(Address).filter_by(
+#     user_id=user.id, city="abarkouh").one_or_none()
 
-print(address.user.username)
+# print(address.user.username)
