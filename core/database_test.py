@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Text, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Text, DateTime, ForeignKey, Table, UniqueConstraint
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship, backref
 from datetime import datetime
 
@@ -13,6 +13,17 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # create base class for declaring tables
 Base = declarative_base()
+
+enrollments = Table("enrollments", Base.metadata,
+                    Column("id", Integer, primary_key=True, autoincrement=True),
+                    Column("user_id", Integer, ForeignKey(
+                        "users.id"), unique=True),
+                    Column("course_id", Integer, ForeignKey(
+                        "courses.id"), unique=True),
+                    Column("enrolled_date", DateTime(), default=datetime.now),
+                    UniqueConstraint("user_id", "course_id",
+                                     name="unique_user_course_inrolled")
+                    )
 
 
 class User(Base):
@@ -29,6 +40,8 @@ class User(Base):
     profile = relationship("Profile", backref="user", uselist=False)
     posts = relationship("Post", backref="user")
     comments = relationship("Comment", backref="user")
+    courses = relationship("Course", secondary=enrollments,
+                           back_populates="attendees")
 
     def __repr__(self):
         return f"User(id={self.id}, username={self.username}, email={self.email})"
@@ -101,6 +114,19 @@ class Comment(Base):
         return f"comment(id={self.id}, user_id={self.user_id}, post_id={self.post_id}, parent_id={self.parent_id})"
 
 
+class Course(Base):
+    __tablename__ = "courses"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String())
+
+    attendees = relationship(
+        "User", secondary=enrollments, back_populates="courses")
+
+    def __repr__(self):
+        return f"course(id={self.id}, title={self.title})"
+
+
 # to create tables and database
 Base.metadata.create_all(engine)
 
@@ -108,34 +134,15 @@ session = SessionLocal()
 
 user = session.query(User).filter_by(username="mahtabbabaei").one_or_none()
 
-# session.add(Post(user_id=user.id, title="Post title", content="Post content"))
+# session.add(Course(title="Python"))
 
 # session.commit()
 
-post = user.posts[0]
+course = session.query(Course).filter_by(title="Python").one()
 
-# session.add(Comment(user_id=user.id, post_id=post.id,
-#             content="this is a parent comment"))
-
-# session.commit()
-
-parent_comment = post.comments[0]
-
-# session.add(Comment(user_id=user.id, post_id=post.id,
-#             parent_id=parent_comment.id, content="this is a reply comment"))
+# course.attendees.append(user)
 
 # session.commit()
 
-# session.add(Comment(user_id=user.id, post_id=post.id,
-#             parent_id=parent_comment.id, content="this is a second reply comment"))
-
-# session.commit()
-
-print(post.comments)
-
-comments = session.query(Comment).filter_by(
-    post_id=post.id, parent_id=None).all()
-print(comments)
-
-for comment in comments:
-    print(comment.children)
+print(course.attendees)
+print(user.courses)
