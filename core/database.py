@@ -19,6 +19,7 @@ class Person(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String())
+    age = Column(Integer())
 
     def __repr__(self):
         return f"Profiles(id={self.id},name={self.name})"
